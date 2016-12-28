@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strconv"
@@ -16,22 +17,26 @@ type Parser interface {
 
 //CsvParser parses a csv file and returns an array of pointers the type specified
 type CsvParser struct {
-	CsvFile         string
-	CsvSeparator    rune
-	SkipFirstLine   bool
-	SkipEmptyValues bool
+	CsvSeparator        rune
+	SkipFirstLine       bool
+	SkipEmptyValues     bool
+	AllowIncompleteRows bool
 }
 
 //Parse creates the array of the given type from the csv file
-func (parser CsvParser) Parse(f interface{}) ([]interface{}, error) {
-
-	csvFile, err := os.Open(parser.CsvFile)
+func (parser CsvParser) Parse(filepath string, f interface{}) ([]interface{}, error) {
+	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
-	defer csvFile.Close()
+	defer file.Close()
 
-	var csvReader = csv.NewReader(csvFile)
+	return parser.ParseWithReader(file, f)
+}
+
+//ParseWithReader creates the array of the given type from the csv file
+func (parser CsvParser) ParseWithReader(r io.Reader, f interface{}) ([]interface{}, error) {
+	var csvReader = csv.NewReader(r)
 	csvReader.Comma = parser.CsvSeparator
 
 	var results = make([]interface{}, 0, 0)
@@ -46,11 +51,15 @@ func (parser CsvParser) Parse(f interface{}) ([]interface{}, error) {
 
 		rawCSVLine, err := csvReader.Read()
 		if err != nil {
-			if fmt.Sprint(err) == "EOF" {
+			if err == io.EOF {
 				break
 			} else {
 				return nil, err
 			}
+		}
+
+		if len(rawCSVLine) == 0 {
+			continue
 		}
 
 		var newResult = reflect.New(resultType).Interface()
@@ -75,7 +84,11 @@ func (parser CsvParser) Parse(f interface{}) ([]interface{}, error) {
 			}
 
 			if csvColumnIndex >= len(rawCSVLine) {
-				return nil, fmt.Errorf("Trying to access csv column %v for field %v, but csv has only %v column(s)", csvColumnIndex, currentField.Name, len(rawCSVLine))
+				if parser.AllowIncompleteRows {
+					break
+				} else {
+					return nil, fmt.Errorf("Trying to access csv column %v for field %v, but csv has only %v column(s)", csvColumnIndex, currentField.Name, len(rawCSVLine))
+				}
 			}
 
 			var csvElement = rawCSVLine[csvColumnIndex]
@@ -136,5 +149,5 @@ func (parser CsvParser) Parse(f interface{}) ([]interface{}, error) {
 
 		results = append(results, newResult)
 	}
-	return results, err
+	return results, nil
 }

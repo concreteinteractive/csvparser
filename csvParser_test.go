@@ -16,13 +16,12 @@ var csvParser CsvParser
 
 func TestMain(m *testing.M) {
 	csvParser = CsvParser{
-		CsvFile:      "example_files/example.csv",
 		CsvSeparator: ',',
 	}
 
-	contacts1, parseErr1 = csvParser.Parse(ExampleContact1{})
-	contacts2, parseErr2 = csvParser.Parse(ExampleContact2{})
-	contacts3, parseErr3 = csvParser.Parse(ExampleContact3{})
+	contacts1, parseErr1 = csvParser.Parse("example_files/example.csv", ExampleContact1{})
+	contacts2, parseErr2 = csvParser.Parse("example_files/example.csv", ExampleContact2{})
+	contacts3, parseErr3 = csvParser.Parse("example_files/example.csv", ExampleContact3{})
 
 	//run all the tests
 	os.Exit(m.Run())
@@ -65,7 +64,7 @@ func TestContactHaveBeenParsed3(t *testing.T) {
 }
 
 func TestContactWithInvalidBoolField(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidBoolean{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidBoolean{})
 
 	if err == nil {
 		t.Error("TestContactWithInvalidBoolField should return an error")
@@ -73,7 +72,7 @@ func TestContactWithInvalidBoolField(t *testing.T) {
 }
 
 func TestContactWithInvalidUintField(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidUint{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidUint{})
 
 	if err == nil {
 		t.Error("TestContactWithInvalidUintField should return an error")
@@ -81,7 +80,7 @@ func TestContactWithInvalidUintField(t *testing.T) {
 }
 
 func TestContactWithInvalidIntField(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidInt{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidInt{})
 
 	if err == nil {
 		t.Error("TestContactWithInvalidIntField should return an error")
@@ -89,7 +88,7 @@ func TestContactWithInvalidIntField(t *testing.T) {
 }
 
 func TestContactWithInvalidFloat32Field(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidFloat32{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidFloat32{})
 
 	if err == nil {
 		t.Error("TestContactWithInvalidFloat32Field should return an error")
@@ -97,7 +96,7 @@ func TestContactWithInvalidFloat32Field(t *testing.T) {
 }
 
 func TestContactWithInvalidFloat64Field(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidFloat64{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidFloat64{})
 
 	if err == nil {
 		t.Error("TestContactWithInvalidFloat64Field should return an error")
@@ -105,7 +104,7 @@ func TestContactWithInvalidFloat64Field(t *testing.T) {
 }
 
 func TestContactWithCsvColumnTooHigh(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactWithCsvColumnFieldTooHigh{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactWithCsvColumnFieldTooHigh{})
 
 	if err == nil {
 		t.Error("TestContactWithCsvColumnTooHigh should return an error")
@@ -113,7 +112,7 @@ func TestContactWithCsvColumnTooHigh(t *testing.T) {
 }
 
 func TestContactWithCsvTagLessThanZero(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactWithCsvTagLessThanZero{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactWithCsvTagLessThanZero{})
 
 	if err == nil {
 		t.Error("ExampleContactWithCsvTagLessThanZero should return an error")
@@ -121,7 +120,7 @@ func TestContactWithCsvTagLessThanZero(t *testing.T) {
 }
 
 func TestContactWithCsvTagNotAnInteger(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactWithCsvTagNotAnInteger{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactWithCsvTagNotAnInteger{})
 
 	if err == nil {
 		t.Error("ExampleContactWithCsvTagNotAnInteger should return an error")
@@ -129,7 +128,7 @@ func TestContactWithCsvTagNotAnInteger(t *testing.T) {
 }
 
 func TestParsingWrongDateFormat(t *testing.T) {
-	_, err := csvParser.Parse(ExampleContactInvalidTime{})
+	_, err := csvParser.Parse("example_files/example.csv", ExampleContactInvalidTime{})
 
 	if err == nil {
 		t.Error("TestParsingWrongDateFormat should return an error")
@@ -138,11 +137,10 @@ func TestParsingWrongDateFormat(t *testing.T) {
 
 func TestParsingANotExistingCsvFile(t *testing.T) {
 	var csvNotExistingParser = CsvParser{
-		CsvFile:      "example_not_existing.csv",
 		CsvSeparator: ',',
 	}
 
-	_, err := csvNotExistingParser.Parse(ExampleContact1{})
+	_, err := csvNotExistingParser.Parse("example_not_existing.csv", ExampleContact1{})
 
 	if err == nil {
 		t.Error("Parsing a not existing csv file should return an error")
@@ -151,11 +149,10 @@ func TestParsingANotExistingCsvFile(t *testing.T) {
 
 func TestParsingAnInvalidCsvFile(t *testing.T) {
 	var csvNotExistingParser = CsvParser{
-		CsvFile:      "example_files/example_invalid.csv",
 		CsvSeparator: ',',
 	}
 
-	_, err := csvNotExistingParser.Parse(ExampleContact1{})
+	_, err := csvNotExistingParser.Parse("example_files/example_invalid.csv", ExampleContact1{})
 
 	if err == nil {
 		t.Error("TestParsingAnInvalidCsvFile should return an error")
@@ -164,12 +161,11 @@ func TestParsingAnInvalidCsvFile(t *testing.T) {
 
 func TestParsingAFileWithFirstLineWithHeaders(t *testing.T) {
 	var parser = CsvParser{
-		CsvFile:       "example_files/example_first_line.csv",
 		CsvSeparator:  ',',
 		SkipFirstLine: true,
 	}
 
-	parsed, err := parser.Parse(ExampleContact1{})
+	parsed, err := parser.Parse("example_files/example_first_line.csv", ExampleContact1{})
 
 	if err != nil {
 		t.Fatalf("TestParsingAFileWithFirstLineWithHeaders: unexpected error reading file: %v", err)
@@ -182,13 +178,12 @@ func TestParsingAFileWithFirstLineWithHeaders(t *testing.T) {
 
 func TestParsingAFileWithEmptyValues(t *testing.T) {
 	var parser = CsvParser{
-		CsvFile:         "example_files/example_empty_values.csv",
 		CsvSeparator:    ',',
 		SkipFirstLine:   true,
 		SkipEmptyValues: true,
 	}
 
-	parsed, err := parser.Parse(ExampleContact1{})
+	parsed, err := parser.Parse("example_files/example_empty_values.csv", ExampleContact1{})
 
 	if err != nil {
 		t.Fatalf("TestParsingAFileWithEmptyValues: unexpected error reading file: %v", err)

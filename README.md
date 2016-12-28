@@ -58,13 +58,13 @@ It's required to specify a `csvDate` tag that will be used for parsing, followin
 
 ```go
 var csvParser = parser.CsvParser{
-    CsvFile:      "path_to_your_file.csv",
     CsvSeparator: ',',
+    AllowIncompleteRows: true, //default:false
     SkipFirstLine : true, //default:false
     SkipEmptyValues : true, //default:false. It will skip empty values and won't try to parse them
 }
 
-var parsedItems, err = csvParser.Parse(YourStruct{})
+var parsedItems, err = csvParser.Parse("path_to_your_file.csv", YourStruct{})
 
 for i := 0; i < len(parsedItems); i++ {
   log.Print(parsedItems[i].(*YourStruct))
