@@ -62,6 +62,21 @@ type ExampleContact3 struct {
 	Description  string
 }
 
+//ExampleContact4 specifies csv columns names
+type ExampleContact4 struct {
+	FirstName    string    `csvColumn:"FirstName"`
+	LastName     string    `csvColumn:"LastName"`
+	Working      bool      `csvColumn:"Working"`
+	Age          int       `csvColumn:"Age"`
+	Salary32     float32   `csvColumn:"Salary32"`
+	Salary64     float64   `csvColumn:"Salary64"`
+	VacationDays uint      `csvColumn:"VacationDays"`
+	Title        string    `csvColumn:"Title"`
+	Email        string    `csvColumn:"Email"`
+	Birthdate    time.Time `csvColumn:"Birthdate" csvDate:"2006-01-02"`
+	Description  string    `csvColumn:"Description"`
+}
+
 //ExampleContactInvalidBoolean is made for testing bool wrong field
 type ExampleContactInvalidBoolean struct {
 	FirstName    string
@@ -202,3 +217,15 @@ func (c3 ExampleContact3) GetTitle() string        { return c3.Title }
 func (c3 ExampleContact3) GetEmail() string        { return c3.Email }
 func (c3 ExampleContact3) GetBirthdate() time.Time { return c3.Birthdate }
 func (c3 ExampleContact3) GetDescription() string  { return c3.Description }
+
+func (c4 ExampleContact4) GetFirstName() string    { return c4.FirstName }
+func (c4 ExampleContact4) GetLastName() string     { return c4.LastName }
+func (c4 ExampleContact4) GetWorking() bool        { return c4.Working }
+func (c4 ExampleContact4) GetAge() int             { return c4.Age }
+func (c4 ExampleContact4) GetSalary32() float32    { return c4.Salary32 }
+func (c4 ExampleContact4) GetSalary64() float64    { return c4.Salary64 }
+func (c4 ExampleContact4) GetVacationDays() uint   { return c4.VacationDays }
+func (c4 ExampleContact4) GetTitle() string        { return c4.Title }
+func (c4 ExampleContact4) GetEmail() string        { return c4.Email }
+func (c4 ExampleContact4) GetBirthdate() time.Time { return c4.Birthdate }
+func (c4 ExampleContact4) GetDescription() string  { return c4.Description }

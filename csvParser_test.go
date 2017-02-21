@@ -176,6 +176,25 @@ func TestParsingAFileWithFirstLineWithHeaders(t *testing.T) {
 	}
 }
 
+func TestParsingAFileWithFirstLineWithHeadersAndModelColumns(t *testing.T) {
+	var parser = CsvParser{
+		CsvSeparator:  ',',
+		SkipFirstLine: true,
+	}
+
+	parsed, err := parser.Parse("example_files/example_first_line.csv", ExampleContact4{})
+
+	if err != nil {
+		t.Fatalf("TestParsingAFileWithFirstLineWithHeaders: unexpected error reading file: %v", err)
+	}
+
+	if len(parsed) != 1 {
+		t.Fatalf("TestParsingAFileWithFirstLineWithHeaders: unexpected number of parsed lines. Actual %v, Expected %v", len(parsed), 1)
+	}
+
+	testSingleContact(t, parsed[0].(*ExampleContact4))
+}
+
 func TestParsingAFileWithEmptyValues(t *testing.T) {
 	var parser = CsvParser{
 		CsvSeparator:    ',',

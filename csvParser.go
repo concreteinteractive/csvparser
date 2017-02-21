@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -34,17 +35,57 @@ func (parser CsvParser) Parse(filepath string, f interface{}) ([]interface{}, er
 	return parser.ParseWithReader(file, f)
 }
 
+func getIndexFromHeaders(headers []string, column string) int {
+	if len(headers) == 0 {
+		return -1
+	}
+
+	for idx, headerText := range headers {
+		if column == headerText {
+			return idx
+		}
+	}
+	return -1
+}
+
+func getCsvColumnIndex(fieldIndex int, field reflect.StructField, headers []string) (int, error) {
+	byHeaderIndex := getIndexFromHeaders(headers, strings.ToLower(field.Tag.Get("csvColumn")))
+	if byHeaderIndex >= 0 {
+		return byHeaderIndex, nil
+	}
+
+	csvTag := field.Tag.Get("csv")
+	if len(csvTag) == 0 {
+		return fieldIndex, nil
+	}
+
+	csvColumnIndex, csvTagErr := strconv.Atoi(csvTag)
+	if csvTagErr != nil {
+		return -1, csvTagErr
+	}
+
+	return csvColumnIndex, nil
+}
+
 //ParseWithReader creates the array of the given type from the csv file
 func (parser CsvParser) ParseWithReader(r io.Reader, f interface{}) ([]interface{}, error) {
+	var err error
 	var csvReader = csv.NewReader(r)
 	csvReader.Comma = parser.CsvSeparator
 
 	var results = make([]interface{}, 0, 0)
 
 	resultType := reflect.ValueOf(f).Type()
+	headers := []string{}
 
 	if parser.SkipFirstLine {
-		csvReader.Read()
+		headers, err = csvReader.Read()
+		if err != nil {
+			headers = []string{}
+		}
+		for i, h := range headers {
+			headers[i] = strings.ToLower(h)
+		}
 	}
 
 	for {
@@ -67,16 +108,9 @@ func (parser CsvParser) ParseWithReader(r io.Reader, f interface{}) ([]interface
 		// set all the struct fields
 		for fieldIndex := 0; fieldIndex < resultType.NumField(); fieldIndex++ {
 			var currentField = resultType.Field(fieldIndex)
-
-			var csvTag = currentField.Tag.Get("csv")
-			var csvColumnIndex, csvTagErr = strconv.Atoi(csvTag)
-
+			csvColumnIndex, csvTagErr := getCsvColumnIndex(fieldIndex, currentField, headers)
 			if csvTagErr != nil {
-				if csvTag == "" {
-					csvColumnIndex = fieldIndex
-				} else {
-					return nil, csvTagErr
-				}
+				return nil, csvTagErr
 			}
 
 			if csvColumnIndex < 0 {
